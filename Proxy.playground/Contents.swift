@@ -8,11 +8,13 @@ protocol ServiceInterface {
     func operation()
 }
 
-class Service: ServiceInterface {
+class Service {
     func operation() {
         print("some heavy task is done here")
     }
 }
+
+extension Service: ServiceInterface {}
 
 class Proxy: ServiceInterface {
     
@@ -59,12 +61,14 @@ class ThirdPartyYoutubeClass {
     }
 }
 
+extension ThirdPartyYoutubeClass: ThirdPartyYoutubeLib {}
+
 class CachedYoutubeClass: ThirdPartyYoutubeLib {
     
     private let youtubeService: ThirdPartyYoutubeClass
-    private let cache: [String]
-    private let videoCache: [String: Any]
-    private var needReset: Bool
+    private var cache: [String] = []
+    private var videoCache: [String: Any] = [:]
+    private var needReset: Bool = false
     
     init(realService: ThirdPartyYoutubeClass) {
         self.youtubeService = realService
@@ -92,6 +96,8 @@ class CachedYoutubeClass: ThirdPartyYoutubeLib {
         }
         if needReset {
             return youtubeService.downloadVideo(id: id)
+        } else {
+            return Data()
         }
     }
 }
@@ -105,14 +111,17 @@ class YoutubeManager {
     
     func renderVideoPage(id: Int) {
         let info = service.getVideoInfo(id: id)
+        print(info)
     }
     
     func renderListPanel(id: Int) {
         let list = service.listVideos()
+        print(list)
     }
 }
 
 let youtubeService = ThirdPartyYoutubeClass()
 let youtubeProxy = CachedYoutubeClass(realService: youtubeService)
-let manager = YoutubeManager(service: youtubeProxy)
+let manager = YoutubeManager(service: youtubeService)
+manager.renderListPanel(id: 1)
 
